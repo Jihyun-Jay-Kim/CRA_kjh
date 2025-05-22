@@ -77,7 +77,7 @@ bool similer(const std::string& a, const std::string& b) {
 	return false;
 }
 
-bool checkCompHit(int indexOfWeek, int indexOfCateogry, string keyword) {
+bool checkCompHit(string keyword) {
 	bool hitFlag = false;
 	for (PointNode& node : weekBest[indexOfWeek]) {
 		if (node.name == keyword) {
@@ -87,7 +87,7 @@ bool checkCompHit(int indexOfWeek, int indexOfCateogry, string keyword) {
 		}
 	}
 
-	for (PointNode& node : categoryBest[indexOfCateogry]) {
+	for (PointNode& node : categoryBest[indexOfCategory]) {
 		if (node.name == keyword) {
 			node.point += (int)(node.point * 0.1);
 			hitFlag = true;
