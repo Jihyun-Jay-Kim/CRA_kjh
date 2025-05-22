@@ -34,13 +34,35 @@ private:
 	vector<PointNode> categoryBest[categoryNum]; //평일, 주말
 	int UZ = basicScore;
 	friend class SearchManagerTest_TestSetSecret_Test;
+	int indexOfWeek;
+	int indexOfCategory;
+
+	bool checkCompHit(string keyword) {
+		bool hitFlag = false;
+		for (PointNode& node : weekBest[indexOfWeek]) {
+			if (node.name == keyword) {
+				node.point += (int)(node.point * 0.1);
+				hitFlag = true;
+				break;
+			}
+		}
+
+		for (PointNode& node : categoryBest[indexOfCategory]) {
+			if (node.name == keyword) {
+				node.point += (int)(node.point * 0.1);
+				hitFlag = true;
+				break;
+			}
+		}
+		return hitFlag;
+	}
 
 	string seachKeyword(SearchNode searchNode) {
 		int point = UZ;
 		UZ++;
 
 		//요일
-		int indexOfWeek = 0;
+		indexOfWeek = 0;
 		for (int i = 0; i < weekNum; i++) {
 			if (searchNode.day == days[i]) {
 				indexOfWeek = i;
@@ -48,31 +70,13 @@ private:
 			}
 		}
 		//평일 / 주말
-		int indexOfCateogry = 0;
-		if (indexOfWeek >= monday && indexOfWeek <= friday) indexOfCateogry = 0;
-		else indexOfCateogry = 1;
+		indexOfCategory = 0;
+		if (indexOfWeek >= monday && indexOfWeek <= friday) indexOfCategory = 0;
+		else indexOfCategory = 1;
 
 		//관리 목록에 존재하는지 확인
 		//관리되는 키워드이면 점수가 증가
-
-		bool hitFlag = false;
-		for (PointNode& node : weekBest[indexOfWeek]) {
-			if (node.name == searchNode.keyword) {
-				node.point += (int)(node.point * 0.1);
-				hitFlag = true;
-				break;
-			}
-		}
-
-		for (PointNode& node : categoryBest[indexOfCateogry]) {
-			if (node.name == searchNode.keyword) {
-				node.point += (int)(node.point * 0.1);
-				hitFlag = true;
-				break;
-			}
-		}
-
-		if (hitFlag == true) {
+		if (checkCompHit(searchNode.keyword) == true) {
 			return searchNode.keyword;
 		}
 		CheckAlgorithms checkAlgorithms;
@@ -86,37 +90,33 @@ private:
 			}
 		}
 
-		for (PointNode& node : categoryBest[indexOfCateogry]) {
+		for (PointNode& node : categoryBest[indexOfCategory]) {
 			if (similarChecker.similar(node.name, searchNode.keyword)) {
 				return node.name;
 			}
 		}
 
 		//완벽 HIT / 찰떡 HIT 둘다 아닌경우
-		if (weekBest[indexOfWeek].size() < vectorMaxSize) {
-			weekBest[indexOfWeek].push_back({ searchNode.keyword, point });
-			std::sort(weekBest[indexOfWeek].begin(), weekBest[indexOfWeek].end());
-		}
-		else if (weekBest[indexOfWeek].back().point < point) {
-			weekBest[indexOfWeek].pop_back();
-			weekBest[indexOfWeek].push_back({ searchNode.keyword, point });
-			std::sort(weekBest[indexOfWeek].begin(), weekBest[indexOfWeek].end());
-		}
-
-		if (categoryBest[indexOfCateogry].size() < vectorMaxSize) {
-			categoryBest[indexOfCateogry].push_back({ searchNode.keyword, point });
-			std::sort(categoryBest[indexOfCateogry].begin(), categoryBest[indexOfCateogry].end());
-		}
-		else if (categoryBest[indexOfCateogry].front().point < point) {
-			categoryBest[indexOfCateogry].pop_back();
-			categoryBest[indexOfCateogry].push_back({ searchNode.keyword, point });
-			std::sort(categoryBest[indexOfCateogry].begin(), categoryBest[indexOfCateogry].end());
-		}
+		weekBest[indexOfWeek].push_back({ searchNode.keyword, point });
+		categoryBest[indexOfCategory].push_back({ searchNode.keyword, point });
 
 		return searchNode.keyword;
 	}
+
+
 private:
 	void nodeSort() {
+		std::sort(weekBest[indexOfWeek].rbegin(), weekBest[indexOfWeek].rend());
+		std::sort(categoryBest[indexOfCategory].rbegin(), categoryBest[indexOfCategory].rend());
+
+		while (weekBest[indexOfWeek].size() > 10) {
+			weekBest[indexOfWeek].pop_back();
+		}
+
+		while (categoryBest[indexOfCategory].size() > 10) {
+			categoryBest[indexOfCategory].pop_back();
+		}
+
 		if (UZ >= maxScore) {
 			UZ = basicScore;
 			for (int i = 0; i < weekNum; i++) {
