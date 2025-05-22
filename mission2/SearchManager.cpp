@@ -109,13 +109,11 @@ private:
 		std::sort(weekBest[indexOfWeek].rbegin(), weekBest[indexOfWeek].rend());
 		std::sort(categoryBest[indexOfCategory].rbegin(), categoryBest[indexOfCategory].rend());
 
-		while (weekBest[indexOfWeek].size() > 10)
-		{
+		while (weekBest[indexOfWeek].size() > 10) {
 			weekBest[indexOfWeek].pop_back();
 		}
 
-		while (categoryBest[indexOfCategory].size() > 10)
-		{
+		while (categoryBest[indexOfCategory].size() > 10) {
 			categoryBest[indexOfCategory].pop_back();
 		}
 
