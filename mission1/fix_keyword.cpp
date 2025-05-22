@@ -17,7 +17,7 @@ struct PointNode {
 	int point;
 
 	bool operator<(const PointNode& other) const {
-		return point > other.point; // ³»¸²Â÷¼ö Á¤·Ä
+		return point > other.point; // ë‚´ë¦¼ì°¨ìˆ˜ ì •ë ¬
 	}
 };
 const int weekNum = 7;
@@ -30,12 +30,14 @@ const int maxScore = 2100000000;
 const string days[weekNum] = { "monday","tuesday","wednesday","thursday","friday","saturday","sunday" };
 enum dayEnum { monday , tuesday, wednesday, thursday, friday, saturday, sunday};
 
-vector<PointNode> weekBest[weekNum]; //¿ù ~ ÀÏ
-vector<PointNode> categoryBest[categoryNum]; //ÆòÀÏ, ÁÖ¸»
+vector<PointNode> weekBest[weekNum]; //ì›” ~ ì¼
+vector<PointNode> categoryBest[categoryNum]; //í‰ì¼, ì£¼ë§
 
 int UZ = basicScore;
+int indexOfWeek;
+int indexOfCategory;
 
-// ·¹º¥½´Å¸ÀÎ °Å¸® °è»ê ¾Ë°í¸®Áò (¹®ÀÚ¿­ À¯»çµµ °Ë»ç)
+// ë ˆë²¤ìŠˆíƒ€ì¸ ê±°ë¦¬ ê³„ì‚° ì•Œê³ ë¦¬ì¦˜ (ë¬¸ìì—´ ìœ ì‚¬ë„ ê²€ì‚¬)
 int levenshtein(const std::string& a, const std::string& b) {
 	const size_t len_a = a.size();
 	const size_t len_b = b.size();
@@ -60,13 +62,13 @@ int checkAlgorithm(const std::string& a, const std::string& b) {
 	return levenshtein(a, b);
 }
 
-// Á¡¼ö È¯»ê
+// ì ìˆ˜ í™˜ì‚°
 bool similer(const std::string& a, const std::string& b) {
 	if (a.empty() || b.empty()) return false;
 
 	int dist = checkAlgorithm(a, b);
 	int max_len = std::max(a.length(), b.length());
-	// À¯»çµµ ºñÀ² (1.0: ¿ÏÀüÈ÷ °°À½, 0.0: ÀüÇô ´Ù¸§)
+	// ìœ ì‚¬ë„ ë¹„ìœ¨ (1.0: ì™„ì „íˆ ê°™ìŒ, 0.0: ì „í˜€ ë‹¤ë¦„)
 	double similarity = 1.0 - (double)dist / max_len;
 
 	int score = 1 + static_cast<int>(similarity * 99);
@@ -74,90 +76,92 @@ bool similer(const std::string& a, const std::string& b) {
 	if (score >= limitScore) return true;
 	return false;
 }
+
+bool checkCompHit(int indexOfWeek, int indexOfCateogry, string keyword) {
+	bool hitFlag = false;
+	for (PointNode& node : weekBest[indexOfWeek]) {
+		if (node.name == keyword) {
+			node.point += (int)(node.point * 0.1);
+			hitFlag = true;
+			break;
+		}
+	}
+
+	for (PointNode& node : categoryBest[indexOfCateogry]) {
+		if (node.name == keyword) {
+			node.point += (int)(node.point * 0.1);
+			hitFlag = true;
+			break;
+		}
+	}
+	return hitFlag;
+}
+
 string seachKeyword(SearchNode searchNode) {
 	int point = UZ;
 	UZ++;
 
-	//¿äÀÏ
-	int indexOfWeek = 0;
-	for (int i = 0; i < weekNum;i++) {
+	//ìš”ì¼
+	indexOfWeek = 0;
+	for (int i = 0; i < weekNum; i++) {
 		if (searchNode.day == days[i]) {
 			indexOfWeek = i;
 			break;
 		}
 	}
-	//ÆòÀÏ / ÁÖ¸»
-	int indexOfCateogry = 0;
-	if (indexOfWeek >= monday && indexOfWeek <= friday) indexOfCateogry = 0;
-	else indexOfCateogry = 1;
+	//í‰ì¼ / ì£¼ë§
+	indexOfCategory = 0;
+	if (indexOfWeek >= monday && indexOfWeek <= friday) indexOfCategory = 0;
+	else indexOfCategory = 1;
 
-	//°ü¸® ¸ñ·Ï¿¡ Á¸ÀçÇÏ´ÂÁö È®ÀÎ
-	//°ü¸®µÇ´Â Å°¿öµåÀÌ¸é Á¡¼ö°¡ Áõ°¡
-
-	int flag = 0;
-	for (PointNode& node : weekBest[indexOfWeek]) {
-		if (node.name == searchNode.keyword) {
-			node.point += (int)(node.point * 0.1);
-			flag = 1;
-			break;
-		}
-	}
-
-	for (PointNode& node : categoryBest[indexOfCateogry]) {
-		if (node.name == searchNode.keyword) {
-			node.point += (int)(node.point * 0.1);
-			flag = 1;
-			break;
-		}
-	}
-
-	if (flag == 1) {
+	//ê´€ë¦¬ ëª©ë¡ì— ì¡´ì¬í•˜ëŠ”ì§€ í™•ì¸
+	//ê´€ë¦¬ë˜ëŠ” í‚¤ì›Œë“œì´ë©´ ì ìˆ˜ê°€ ì¦ê°€
+	if (checkCompHit(indexOfWeek, indexOfCategory, searchNode.keyword) == true) {
 		return searchNode.keyword;
 	}
+	CheckAlgorithms checkAlgorithms;
+	checkAlgorithms.setAlgorithm(std::make_shared<LevenshteinAlgorithms>());
+	SimilarChecker similarChecker = SimilarChecker(limitScore, checkAlgorithms);
 
-	//Âû¶± HIT
+	//ì°°ë–¡ HIT
 	for (PointNode& node : weekBest[indexOfWeek]) {
-		if (similer(node.name, searchNode.keyword)) {
+		if (similarChecker.similar(node.name, searchNode.keyword)) {
 			return node.name;
 		}
 	}
 
-	for (PointNode& node : categoryBest[indexOfCateogry]) {
-		if (similer(node.name, searchNode.keyword)) {
+	for (PointNode& node : categoryBest[indexOfCategory]) {
+		if (similarChecker.similar(node.name, searchNode.keyword)) {
 			return node.name;
 		}
 	}
 
-	//¿Ïº® HIT / Âû¶± HIT µÑ´Ù ¾Æ´Ñ°æ¿ì
-	if (weekBest[indexOfWeek].size() < vectorMaxSize) {
-		weekBest[indexOfWeek].push_back({ searchNode.keyword, point });
-		std::sort(weekBest[indexOfWeek].begin(), weekBest[indexOfWeek].end());
-	}
-	else if (weekBest[indexOfWeek].back().point < point) {
-		weekBest[indexOfWeek].pop_back();
-		weekBest[indexOfWeek].push_back({ searchNode.keyword, point });
-		std::sort(weekBest[indexOfWeek].begin(), weekBest[indexOfWeek].end());
-	}
-
-	if (categoryBest[indexOfCateogry].size() < vectorMaxSize) {
-		categoryBest[indexOfCateogry].push_back({ searchNode.keyword, point });
-		std::sort(categoryBest[indexOfCateogry].begin(), categoryBest[indexOfCateogry].end());
-	}
-	else if (categoryBest[indexOfCateogry].front().point < point) {
-		categoryBest[indexOfCateogry].pop_back();
-		categoryBest[indexOfCateogry].push_back({ searchNode.keyword, point });
-		std::sort(categoryBest[indexOfCateogry].begin(), categoryBest[indexOfCateogry].end());
-	}
+	//ì™„ë²½ HIT / ì°°ë–¡ HIT ë‘˜ë‹¤ ì•„ë‹Œê²½ìš°
+	weekBest[indexOfWeek].push_back({ searchNode.keyword, point });
+	categoryBest[indexOfCategory].push_back({ searchNode.keyword, point });
 
 	return searchNode.keyword;
 }
 
 void nodeSort() {
+	std::sort(weekBest[indexOfWeek].rbegin(), weekBest[indexOfWeek].rend());
+	std::sort(categoryBest[indexOfCategory].rbegin(), categoryBest[indexOfCategory].rend());
+
+	while (weekBest[indexOfWeek].size() > 10)
+	{
+		weekBest[indexOfWeek].pop_back();
+	}
+
+	while (categoryBest[indexOfCategory].size() > 10)
+	{
+		categoryBest[indexOfCategory].pop_back();
+	}
+
 	if (UZ >= maxScore) {
 		UZ = basicScore;
 		for (int i = 0; i < weekNum; i++) {
 			int num = 1;
-			for (int j = weekBest[i].size() - 1; j >= 0; j--) { // ³·Àº Á¡¼öºÎÅÍ 1À» Áà¾ßÇÔ
+			for (int j = weekBest[i].size() - 1; j >= 0; j--) { // ë‚®ì€ ì ìˆ˜(vectorì˜ back)ë¶€í„° 1ì„ ì¤˜ì•¼í•¨
 				weekBest[i][j].point = num;
 				num++;
 			}
@@ -165,7 +169,7 @@ void nodeSort() {
 		for (int i = 0; i < categoryNum; i++) {
 			int num = 1;
 			for (PointNode& node : categoryBest[i]) {
-				for (int j = categoryBest[i].size() - 1; j >= 0; j--) { // ³·Àº Á¡¼öºÎÅÍ 1À» Áà¾ßÇÔ
+				for (int j = categoryBest[i].size() - 1; j >= 0; j--) {
 					categoryBest[i][j].point = num;
 					num++;
 				}
@@ -184,7 +188,7 @@ string search(SearchNode searchNode) {
 void input() {
 	SearchNode searchNode;
 	try {
-		ifstream fin{ "keyword_weekday_500.txt" }; //500°³ µ¥ÀÌÅÍ ÀÔ·Â
+		ifstream fin{ "keyword_weekday_500.txt" }; //500ê°œ ë°ì´í„° ì…ë ¥
 		while (!fin.eof()) {
 			fin >> searchNode.keyword >> searchNode.day;
 			string resultString = search(searchNode);
@@ -192,7 +196,7 @@ void input() {
 		}
 	}
 	catch (const std::exception& e) {
-		std::cerr << "¿¹¿Ü ¹ß»ı: " << e.what() << std::endl;
+		std::cerr << "ì˜ˆì™¸ ë°œìƒ: " << e.what() << std::endl;
 	}
 }
 
