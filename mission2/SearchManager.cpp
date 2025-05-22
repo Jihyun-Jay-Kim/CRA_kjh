@@ -76,7 +76,7 @@ private:
 
 		//관리 목록에 존재하는지 확인
 		//관리되는 키워드이면 점수가 증가
-		if (checkCompHit(indexOfWeek, indexOfCategory, searchNode.keyword) == true) {
+		if (checkCompHit(searchNode.keyword) == true) {
 			return searchNode.keyword;
 		}
 		CheckAlgorithms checkAlgorithms;
