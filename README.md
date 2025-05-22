@@ -12,4 +12,4 @@ D5 O (아래 첨부)<br/>
 ![image](https://github.com/user-attachments/assets/342f33b5-25ab-4868-8ecb-036fd3cba7b1)<br/>
 
 
-## 채점 시 JAVA 과정 수강생이었던 점 참고 부탁드립니다.
+### 채점 시 JAVA 과정 수강생이었던 점 참고 부탁드립니다...ㅠ
