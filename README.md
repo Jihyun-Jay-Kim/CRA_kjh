@@ -5,7 +5,7 @@ D3 O (VirtualAlgorithms 을 사용하여 확장성 고려)<br/>
 D4 O (VirtualAlgorithms 을 사용하여 전략 패턴으로 알고리즘 교체 설계)<br/>
 D5 O (아래 첨부)<br/>
 
-# <Coverage><br/>
+# <Coverage 캡처 첨부><br/>
 ![image](https://github.com/user-attachments/assets/5cd90893-b0ed-4e6f-a4e6-ba668f930937)<br/>
 
 <br/>
